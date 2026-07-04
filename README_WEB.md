@@ -113,15 +113,15 @@ SECRET_KEY=随机字符串
 
 ## GitHub Actions 自动发布
 
-在 GitHub 仓库 **Settings > Secrets and variables > Actions** 配置：
+在 GitHub 仓库 **Settings → Secrets and variables → Actions** 配置：
 
-```text
-VERCEL_TOKEN
-VERCEL_ORG_ID
-VERCEL_PROJECT_ID
-```
+| Secret | 在哪里找 |
+|--------|----------|
+| `VERCEL_TOKEN` | [Vercel Account Settings → Tokens](https://vercel.com/account/settings/tokens) → **Create** 生成 |
+| `VERCEL_ORG_ID` | Vercel **所有项目** 页 → **Settings** → **General** → **Team ID** |
+| `VERCEL_PROJECT_ID` | 目标项目 → **Settings → General** → **Project ID** 字段 |
 
-首次可在 Vercel 控制台导入 GitHub 仓库，或本地执行 `vercel link` 关联项目，再从项目 Settings 复制 Org ID / Project ID。
+也可本地执行 `vercel link` 后查看 `.vercel/project.json` 中的 `orgId` 与 `projectId`（该目录已在 `.gitignore` 中，勿提交）。
 
 发布：
 
