@@ -8,6 +8,7 @@
 - 密钥支持下拉选择：内置项、本地历史缓存、自定义输入。
 - 激活码逻辑复刻旧版 `genbtn`：对注册码输入做 DES/XDES 加密。
 - 提供 JSON API 与命令行客户端，供外部系统调用。
+- 使用 Git tag 自动发布到 Vercel。
 
 ## 设计流程图
 
@@ -48,6 +49,9 @@ registerTool/
 │   ├── css/main.css
 │   └── js/main.js          # 调用 /api/register-code
 ├── env.example             # 配置模板
+├── vercel.json             # 关闭 main 自动部署，改由 tag 触发 CI/CD
+├── .vercelignore
+├── .github/workflows/main.yml
 └── requirements.txt
 ```
 
@@ -94,6 +98,39 @@ DEFAULT_SN=
 | `DEFAULT_SN` | 空 | Web 页面注册码输入框默认值 |
 
 未写入 `.env` 的项使用上表默认值。命令行客户端地址通过 `--base-url` 指定，不放在服务端 `.env` 中。
+
+## Vercel 部署
+
+Flask 入口为根目录 `app.py`。生产环境变量在 **Vercel 项目 Settings > Environment Variables** 配置，勿提交 `.env`：
+
+```text
+REGISTER_KEY=你的8字节内置密钥
+DEFAULT_SN=
+SECRET_KEY=随机字符串
+```
+
+`vercel.json` 已关闭 `main` 分支 Git 自动部署；生产发布通过 Git tag 触发 GitHub Actions。
+
+## GitHub Actions 自动发布
+
+在 GitHub 仓库 **Settings > Secrets and variables > Actions** 配置：
+
+```text
+VERCEL_TOKEN
+VERCEL_ORG_ID
+VERCEL_PROJECT_ID
+```
+
+首次可在 Vercel 控制台导入 GitHub 仓库，或本地执行 `vercel link` 关联项目，再从项目 Settings 复制 Org ID / Project ID。
+
+发布：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+推送 `v*` 标签后，`.github/workflows/main.yml` 会执行 Vercel Production 构建与部署。
 
 ## API
 

@@ -1,5 +1,6 @@
 from flask import Flask, jsonify, render_template, request
 from werkzeug.exceptions import HTTPException
+import os
 
 from api import api_bp
 from config import AppConfig
@@ -39,4 +40,10 @@ def handle_unexpected_error(error):
 
 
 if __name__ == "__main__":
-    app.run(debug=True, host=app.config["APP_HOST"], port=app.config["APP_PORT"])
+    debug_enabled = os.getenv("APP_DEBUG", "0") == "1"
+    app.run(
+        debug=debug_enabled,
+        use_reloader=False,
+        host=app.config["APP_HOST"],
+        port=app.config["APP_PORT"],
+    )
