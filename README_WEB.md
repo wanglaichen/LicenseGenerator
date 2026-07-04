@@ -49,6 +49,7 @@ registerTool/
 │   ├── css/main.css
 │   └── js/main.js          # 调用 /api/register-code
 ├── env.example             # 配置模板
+├── Vercel发版说明.md        # Vercel 生产发版步骤（tag 触发 CI/CD）
 ├── vercel.json             # 关闭 main 自动部署，改由 tag 触发 CI/CD
 ├── .vercelignore
 ├── .github/workflows/main.yml
@@ -99,38 +100,11 @@ DEFAULT_SN=
 
 未写入 `.env` 的项使用上表默认值。命令行客户端地址通过 `--base-url` 指定，不放在服务端 `.env` 中。
 
-## Vercel 部署
+## Vercel 发版
 
-Flask 入口为根目录 `app.py`。生产环境变量在 **Vercel 项目 Settings > Environment Variables** 配置，勿提交 `.env`：
+生产环境通过推送 `v*` 标签触发 GitHub Actions 部署到 Vercel；`main` 分支 push 不会自动上线。
 
-```text
-REGISTER_KEY=你的8字节内置密钥
-DEFAULT_SN=
-SECRET_KEY=随机字符串
-```
-
-`vercel.json` 已关闭 `main` 分支 Git 自动部署；生产发布通过 Git tag 触发 GitHub Actions。
-
-## GitHub Actions 自动发布
-
-在 GitHub 仓库 **Settings → Secrets and variables → Actions** 配置：
-
-| Secret | 在哪里找 |
-|--------|----------|
-| `VERCEL_TOKEN` | [Vercel Account Settings → Tokens](https://vercel.com/account/settings/tokens) → **Create** 生成 |
-| `VERCEL_ORG_ID` | Vercel **所有项目** 页 → **Settings** → **General** → **Team ID** |
-| `VERCEL_PROJECT_ID` | 目标项目 → **Settings → General** → **Project ID** 字段 |
-
-也可本地执行 `vercel link` 后查看 `.vercel/project.json` 中的 `orgId` 与 `projectId`（该目录已在 `.gitignore` 中，勿提交）。
-
-发布：
-
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-推送 `v*` 标签后，`.github/workflows/main.yml` 会执行 Vercel Production 构建与部署。
+**完整步骤**（Vercel 项目设置、环境变量、GitHub Secrets、打标签、发版后验证、常见问题）见 **[Vercel发版说明.md](./Vercel发版说明.md)**。
 
 ## API
 

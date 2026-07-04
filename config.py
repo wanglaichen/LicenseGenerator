@@ -26,5 +26,5 @@ class AppConfig:
     SECRET_KEY = os.getenv("SECRET_KEY", "regmachine-web-dev")
     APP_HOST = os.getenv("APP_HOST", "0.0.0.0")
     APP_PORT = int(os.getenv("APP_PORT", os.getenv("PORT", "9212")))
-    REGISTER_KEY = os.getenv("REGISTER_KEY", "tech2000")
+    REGISTER_KEY = os.getenv("REGISTER_KEY", "")
     DEFAULT_SN = os.getenv("DEFAULT_SN", "")

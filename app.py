@@ -15,7 +15,6 @@ def index():
     return render_template(
         "index.html",
         default_sn=app.config["DEFAULT_SN"],
-        default_key=app.config["REGISTER_KEY"],
     )
 
 

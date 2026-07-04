@@ -1,14 +1,15 @@
 const KEY_HISTORY_STORAGE = "regmachine_key_history";
 const KEY_LAST_SELECTED_STORAGE = "regmachine_key_last_selected";
 const CUSTOM_KEY_VALUE = "__custom__";
+const BUILTIN_OPTION_VALUE = "__builtin__";
 const MAX_KEY_HISTORY = 10;
 
 function byId(id) {
     return document.getElementById(id);
 }
 
-function getBuiltInKey() {
-    return document.querySelector(".key-field").dataset.builtinKey || "tech2000";
+function isBuiltInSelection(value) {
+    return value === BUILTIN_OPTION_VALUE;
 }
 
 function loadKeyHistory() {
@@ -26,8 +27,7 @@ function saveKeyHistory(history) {
 }
 
 function rememberKey(key) {
-    const builtInKey = getBuiltInKey();
-    if (!key || key === builtInKey) {
+    if (!key || isBuiltInSelection(byId("keySelect").value)) {
         return loadKeyHistory();
     }
 
@@ -39,21 +39,17 @@ function rememberKey(key) {
 
 function renderKeyOptions(selectedValue = null) {
     const select = byId("keySelect");
-    const builtInKey = getBuiltInKey();
     const history = loadKeyHistory();
-    const lastSelected = selectedValue || localStorage.getItem(KEY_LAST_SELECTED_STORAGE) || builtInKey;
+    const lastSelected = selectedValue || localStorage.getItem(KEY_LAST_SELECTED_STORAGE) || BUILTIN_OPTION_VALUE;
 
     select.innerHTML = "";
 
     const builtInOption = document.createElement("option");
-    builtInOption.value = builtInKey;
+    builtInOption.value = BUILTIN_OPTION_VALUE;
     builtInOption.textContent = "内置";
     select.appendChild(builtInOption);
 
     history.forEach((key) => {
-        if (key === builtInKey) {
-            return;
-        }
         const option = document.createElement("option");
         option.value = key;
         option.textContent = key;
@@ -66,7 +62,7 @@ function renderKeyOptions(selectedValue = null) {
     select.appendChild(customOption);
 
     if (lastSelected === CUSTOM_KEY_VALUE || !Array.from(select.options).some((option) => option.value === lastSelected)) {
-        select.value = lastSelected === CUSTOM_KEY_VALUE ? CUSTOM_KEY_VALUE : builtInKey;
+        select.value = lastSelected === CUSTOM_KEY_VALUE ? CUSTOM_KEY_VALUE : BUILTIN_OPTION_VALUE;
     } else {
         select.value = lastSelected;
     }
@@ -83,6 +79,9 @@ function getSelectedKey() {
     const select = byId("keySelect");
     if (select.value === CUSTOM_KEY_VALUE) {
         return byId("keyCustom").value.trim();
+    }
+    if (isBuiltInSelection(select.value)) {
+        return "";
     }
     return select.value;
 }
@@ -122,14 +121,19 @@ async function requestJson(url, options = {}) {
 async function generateRegisterCode() {
     clearMessages();
     const button = byId("generateRegisterButton");
+    const selectValue = byId("keySelect").value;
     const key = getSelectedKey();
 
-    if (!key) {
-        showMessage("error", "请选择或输入密钥");
-        return;
-    }
-
-    if (key.length !== 8) {
+    if (selectValue === CUSTOM_KEY_VALUE) {
+        if (!key) {
+            showMessage("error", "请输入自定义密钥");
+            return;
+        }
+        if (key.length !== 8) {
+            showMessage("error", "密钥必须是 8 个字符");
+            return;
+        }
+    } else if (!isBuiltInSelection(selectValue) && key.length !== 8) {
         showMessage("error", "密钥必须是 8 个字符");
         return;
     }
@@ -137,12 +141,14 @@ async function generateRegisterCode() {
     button.disabled = true;
 
     try {
+        const payload = { sn: byId("sn").value };
+        if (key) {
+            payload.key = key;
+        }
+
         const result = await requestJson("/api/register-code", {
             method: "POST",
-            body: JSON.stringify({
-                sn: byId("sn").value,
-                key,
-            }),
+            body: JSON.stringify(payload),
         });
 
         byId("registerCode").textContent = result.activation_code;

@@ -177,7 +177,7 @@ def xdes_hex(text: str, key: str) -> str:
     if not data:
         raise ValueError("请输入 SN。")
     if len(key_bytes) != 8:
-        raise ValueError("密钥必须是 8 个 Latin-1 字节，旧版默认值为 tech2000。")
+        raise ValueError("密钥必须是 8 个 Latin-1 字节。")
 
     padding_len = (-len(data)) % 8
     if padding_len:
